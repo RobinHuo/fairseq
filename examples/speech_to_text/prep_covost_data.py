@@ -13,7 +13,7 @@ from typing import Optional, Tuple
 
 import pandas as pd
 import torchaudio
-from examples.speech_to_text.data_utils import (
+from data_utils import (
     create_zip,
     extract_fbank_features,
     filter_manifest_df,

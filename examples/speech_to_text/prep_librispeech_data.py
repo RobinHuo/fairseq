@@ -11,7 +11,7 @@ import shutil
 from tempfile import NamedTemporaryFile
 
 import pandas as pd
-from examples.speech_to_text.data_utils import (
+from data_utils import (
     create_zip,
     extract_fbank_features,
     gen_config_yaml,
