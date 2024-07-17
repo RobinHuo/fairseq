@@ -49,7 +49,7 @@ def process(args):
         dataset = LIBRISPEECH(out_root.as_posix(), url=split, download=True)
         print("Extracting log mel filter bank features...")
         for wav, sample_rate, _, spk_id, chapter_no, utt_no in tqdm(dataset):
-            sample_id = f"{spk_id}-{chapter_no}-{utt_no}"
+            sample_id = f"{spk_id}-{chapter_no}-{utt_no:04}"
             extract_fbank_features(
                 wav, sample_rate, feature_root / f"{sample_id}.npy"
             )
@@ -66,7 +66,7 @@ def process(args):
         manifest = {c: [] for c in MANIFEST_COLUMNS}
         dataset = LIBRISPEECH(out_root.as_posix(), url=split)
         for _, _, utt, spk_id, chapter_no, utt_no in tqdm(dataset):
-            sample_id = f"{spk_id}-{chapter_no}-{utt_no}"
+            sample_id = f"{spk_id}-{chapter_no}-{utt_no:04}"
             manifest["id"].append(sample_id)
             manifest["audio"].append(audio_paths[sample_id])
             manifest["n_frames"].append(audio_lengths[sample_id])
