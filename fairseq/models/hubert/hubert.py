@@ -395,12 +395,12 @@ class HubertModel(BaseFairseqModel):
 
     def forward_features(self, source: torch.Tensor) -> torch.Tensor:
         if self.feature_grad_mult > 0:
-            features = self.feature_extractor(source)
+            features, _ = self.feature_extractor(source)
             if self.feature_grad_mult != 1.0:
                 features = GradMultiply.apply(features, self.feature_grad_mult)
         else:
             with torch.no_grad():
-                features = self.feature_extractor(source)
+                features, _ = self.feature_extractor(source)
         return features
 
     def forward_targets(

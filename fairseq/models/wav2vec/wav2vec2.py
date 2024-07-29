@@ -607,12 +607,12 @@ class Wav2Vec2Model(BaseFairseqModel):
     ):
 
         if self.feature_grad_mult > 0:
-            features = self.feature_extractor(source)
+            features, _ = self.feature_extractor(source)
             if self.feature_grad_mult != 1.0:
                 features = GradMultiply.apply(features, self.feature_grad_mult)
         else:
             with torch.no_grad():
-                features = self.feature_extractor(source)
+                features, _ = self.feature_extractor(source)
 
         features_pen = features.float().pow(2).mean()
 
@@ -787,7 +787,7 @@ class Wav2Vec2Model(BaseFairseqModel):
 
     def quantize(self, x):
         assert self.quantizer is not None
-        x = self.feature_extractor(x)
+        x, _ = self.feature_extractor(x)
         x = x.transpose(1, 2)
         x = self.layer_norm(x)
         return self.quantizer.forward_idx(x)
@@ -915,11 +915,13 @@ class ConvFeatureExtractionModel(nn.Module):
 
         # BxT -> BxCxT
         x = x.unsqueeze(1)
+        all_rep = []
 
         for conv in self.conv_layers:
             x = conv(x)
+            all_rep.append(x)
 
-        return x
+        return x, all_rep
 
 
 def make_conv_pos(e, k, g, is_batch_norm=False):
