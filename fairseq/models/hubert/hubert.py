@@ -459,7 +459,11 @@ class HubertModel(BaseFairseqModel):
         features = self.dropout_input(features)
         unmasked_features = self.dropout_features(unmasked_features)
 
-        if mask:
+        if isinstance(mask, torch.Tensor):
+            mask_indices = mask[:, : features.size(1)]
+            x = features
+            x[mask_indices] = self.mask_emb
+        elif mask:
             x, mask_indices = self.apply_mask(features, padding_mask, target_list)
         else:
             x = features
@@ -482,6 +486,7 @@ class HubertModel(BaseFairseqModel):
                 "padding_mask": padding_mask,
                 "features": features,
                 "layer_results": layer_results,
+                "mask_indices": mask_indices,
             }
 
         def compute_pred(proj_x, target, label_embs):
