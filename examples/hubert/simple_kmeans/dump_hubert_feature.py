@@ -12,6 +12,7 @@ import soundfile as sf
 import torch
 import torch.nn.functional as F
 
+import fairseq.checkpoint_utils
 from feature_utils import get_path_iterator, dump_feature
 from fairseq.data.audio.audio_utils import get_features_or_waveform
 
@@ -87,7 +88,11 @@ if __name__ == "__main__":
     parser.add_argument("rank", type=int)
     parser.add_argument("feat_dir")
     parser.add_argument("--max_chunk", type=int, default=1600000)
+    parser.add_argument("--user_dir")
     args = parser.parse_args()
     logger.info(args)
+
+    if args.user_dir:
+        fairseq.utils.import_user_module(argparse.Namespace(user_dir=str(args.user_dir)))
 
     main(**vars(args))
