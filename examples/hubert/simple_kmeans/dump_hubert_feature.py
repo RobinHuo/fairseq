@@ -41,7 +41,9 @@ class HubertFeatureReader(object):
         logger.info(f" max_chunk = {self.max_chunk}")
 
     def read_audio(self, path, ref_len=None):
-        wav = get_features_or_waveform(path, need_waveform=True, use_sample_rate=self.task.cfg.sample_rate)
+        wav = get_features_or_waveform(
+            path, need_waveform=True, use_sample_rate=self.task.cfg.sample_rate
+        )
         if wav.ndim == 2:
             wav = wav.mean(-1)
         assert wav.ndim == 1, wav.ndim
@@ -70,7 +72,11 @@ class HubertFeatureReader(object):
         return torch.cat(feat, 1).squeeze(0)
 
 
-def main(tsv_dir, split, ckpt_path, layer, nshard, rank, feat_dir, max_chunk):
+def main(tsv_dir, split, ckpt_path, layer, nshard, rank, feat_dir, max_chunk, user_dir):
+    if user_dir:
+        fairseq.utils.import_user_module(
+            argparse.Namespace(user_dir=str(args.user_dir))
+        )
     reader = HubertFeatureReader(ckpt_path, layer, max_chunk)
     generator, num = get_path_iterator(f"{tsv_dir}/{split}.tsv", nshard, rank)
     dump_feature(reader, generator, num, split, nshard, rank, feat_dir)
@@ -91,8 +97,5 @@ if __name__ == "__main__":
     parser.add_argument("--user_dir")
     args = parser.parse_args()
     logger.info(args)
-
-    if args.user_dir:
-        fairseq.utils.import_user_module(argparse.Namespace(user_dir=str(args.user_dir)))
 
     main(**vars(args))
