@@ -395,13 +395,13 @@ class HubertModel(BaseFairseqModel):
 
     def forward_features(self, source: torch.Tensor) -> torch.Tensor:
         if self.feature_grad_mult > 0:
-            features, _ = self.feature_extractor(source)
+            features, all_feat = self.feature_extractor(source)
             if self.feature_grad_mult != 1.0:
                 features = GradMultiply.apply(features, self.feature_grad_mult)
         else:
             with torch.no_grad():
-                features, _ = self.feature_extractor(source)
-        return features
+                features, all_feat = self.feature_extractor(source)
+        return features, all_feat
 
     def forward_targets(
         self,
@@ -440,7 +440,7 @@ class HubertModel(BaseFairseqModel):
         output_layer: Optional[int] = None,
     ) -> Dict[str, torch.Tensor]:
         """output layer is 1-based"""
-        features = self.forward_features(source)
+        features, all_conv = self.forward_features(source)
         if target_list is not None:
             features, target_list = self.forward_targets(features, target_list)
 
@@ -487,6 +487,7 @@ class HubertModel(BaseFairseqModel):
                 "features": features,
                 "layer_results": layer_results,
                 "mask_indices": mask_indices,
+                "conv_layer_results": all_conv,
             }
 
         def compute_pred(proj_x, target, label_embs):

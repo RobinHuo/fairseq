@@ -607,12 +607,12 @@ class Wav2Vec2Model(BaseFairseqModel):
     ):
 
         if self.feature_grad_mult > 0:
-            features, _ = self.feature_extractor(source)
+            features, all_conv = self.feature_extractor(source)
             if self.feature_grad_mult != 1.0:
                 features = GradMultiply.apply(features, self.feature_grad_mult)
         else:
             with torch.no_grad():
-                features, _ = self.feature_extractor(source)
+                features, all_conv = self.feature_extractor(source)
 
         features_pen = features.float().pow(2).mean()
 
@@ -698,6 +698,7 @@ class Wav2Vec2Model(BaseFairseqModel):
                 "padding_mask": padding_mask,
                 "features": unmasked_features,
                 "layer_results": layer_results,
+                "conv_layer_results": all_conv,
             }
 
         if self.quantizer:
